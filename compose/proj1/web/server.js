@@ -1,23 +1,45 @@
 const os = require('os');
 const express = require('express');
-const app = express();
 const redis = require('redis');
 
+const app = express();
+
+// Create Redis client
 const redisClient = redis.createClient({
-  host: 'redis',
-  port: 6379
+  socket: {
+    host: 'redis', // Must match Docker service name
+    port: 6379
+  }
 });
 
-app.get('/', function(req, res) {
-    redisClient.get('numVisits', function(err, numVisits) {
-        let numVisitsToDisplay = parseInt(numVisits) || 0;
-        numVisitsToDisplay += 1;
+// Handle Redis errors
+redisClient.on('error', (err) => {
+  console.error('❌ Redis error:', err);
+});
 
-        redisClient.set('numVisits', numVisitsToDisplay);
-        res.send(os.hostname() + ': Number of visits is: ' + numVisitsToDisplay);
+// Self-executing async function
+(async () => {
+  try {
+    await redisClient.connect();
+    console.log('✅ Connected to Redis');
+
+    app.get('/', async (req, res) => {
+      try {
+        let numVisits = await redisClient.get('numVisits');
+        let count = parseInt(numVisits) || 0;
+        count += 1;
+        await redisClient.set('numVisits', count);
+        res.send(`${os.hostname()}: Number of visits is: ${count}`);
+      } catch (err) {
+        console.error('❌ Error during request:', err);
+        res.status(500).send('Error talking to Redis');
+      }
     });
-});
 
-app.listen(5000, '0.0.0.0', function() {
-    console.log('Web application is listening on port 5000');
-});
+    app.listen(5000, '0.0.0.0', () => {
+      console.log('🌐 Web application is listening on port 5000');
+    });
+  } catch (err) {
+    console.error('❌ Failed to start app:', err);
+  }
+})();

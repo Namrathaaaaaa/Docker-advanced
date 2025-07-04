@@ -1,4 +1,4 @@
-FROM node:18 AS builder
+FROM node:latest AS builder
 
 WORKDIR /usr/src/app
 
@@ -8,7 +8,7 @@ RUN npm i
 COPY ./server.js ./
 
 
-FROM node:18 AS production
+FROM node:lts-alpine AS production
 
 WORKDIR /usr/src/app
 
@@ -16,7 +16,7 @@ COPY --from=builder /usr/src/app ./
 
 EXPOSE 6379
 
-CMD ["npm","start"]
+CMD ["node","server.js"]
 
 
 
