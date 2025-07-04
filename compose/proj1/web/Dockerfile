@@ -1,20 +1,22 @@
-FROM node:14.17.3-alpine3.14 AS builder
+FROM node:18 AS builder
 
 WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
-RUN npm ci 
+RUN npm i 
 COPY ./server.js ./
 
 
-FROM node:14.17.3-alpine3.14 AS production
+FROM node:18 AS production
+
+WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app ./
 
 EXPOSE 6379
 
-CMD [ "npm","start" ]
+CMD ["npm","start"]
 
 
 

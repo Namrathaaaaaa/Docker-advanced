@@ -1,25 +1,34 @@
+version: "3.8"
+
 services:
   redis:
-    image: "redislabs/redismod"
+    image: redislabs/redismod
     ports:
-      - "6397:6397"
-
+      - "6379:6379"
   web1:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
     restart: on-failure
-    build: ./web
     hostname: web1
     ports:
       - "81:5000"
-
+    depends_on:
+      - redis
   web2:
-    restart: on-failure
-    build: ./web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
     hostname: web2
     ports:
       - "82:5000"
+    depends_on:
+      - redis
 
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     depends_on:
