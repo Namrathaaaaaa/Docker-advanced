@@ -42,6 +42,13 @@ Welcome to the **Docker Advanced Concepts Plan** – tailored for DevOps enginee
 
 ---
 
+## 🔗 References
+
+- [Docker Awesome Compose – Prometheus + Grafana Example](https://github.com/docker/awesome-compose/tree/master/prometheus-grafana)
+
+
+---
+
 ## 📌 Tips
 
 - Track your progress by marking days as complete ✅  
