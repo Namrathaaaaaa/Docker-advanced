@@ -1,6 +1,7 @@
 # Docker Volumes: From Basics to Advanced
 
 ## Table of Contents
+
 1. [What are Docker Volumes?](#what-are-docker-volumes)
 2. [Types of Storage](#types-of-storage)
 3. [Basic Operations](#basic-operations)
@@ -13,6 +14,7 @@
 Docker Volumes solve the problem of data persistence in containers. By default, containers are ephemeral - when they stop, all data is lost. Volumes provide a way to persist and share data between containers.
 
 ### Key Benefits:
+
 - **Persistent**: Data survives container restarts and deletions
 - **Shareable**: Multiple containers can mount the same volume
 - **Portable**: Easy to backup, restore, and migrate
@@ -21,30 +23,36 @@ Docker Volumes solve the problem of data persistence in containers. By default, 
 ## Types of Storage
 
 ### 1. **Named Volumes** (Recommended)
+
 ```bash
 # Create and use named volume
 docker volume create myvolume
 docker run -v myvolume:/app/data nginx
 ```
+
 - Managed by Docker
 - Easy to backup and share
 - Best for production
 
 ### 2. **Bind Mounts**
+
 ```bash
 # Mount host directory
 docker run -v /host/path:/container/path nginx
 docker run -v $(pwd):/app/src node:16  # Development
 ```
+
 - Direct host filesystem mapping
 - Good for development
 - Real-time file changes
 
 ### 3. **Anonymous Volumes**
+
 ```bash
 # Temporary volume
 docker run -v /app/data nginx
 ```
+
 - No specific name
 - Cleaned up automatically
 - For temporary data
@@ -52,6 +60,7 @@ docker run -v /app/data nginx
 ## Basic Operations
 
 ### Volume Management
+
 ```bash
 # Create volume
 docker volume create myvolume
@@ -70,6 +79,7 @@ docker volume prune
 ```
 
 ### Using Volumes
+
 ```bash
 # Mount named volume
 docker run -v myvolume:/app/data nginx
@@ -84,6 +94,7 @@ docker run -v /host/path:/container/path nginx
 ## Practical Examples
 
 ### Database with Persistent Storage
+
 ```bash
 # MySQL with persistent data
 docker volume create mysql-data
@@ -95,6 +106,7 @@ docker run -d \
 ```
 
 ### Development Environment
+
 ```bash
 # Node.js development with live reload
 docker run -d \
@@ -106,15 +118,16 @@ docker run -d \
 ```
 
 ### Docker Compose Example
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   web:
     image: nginx
     volumes:
       - web-data:/usr/share/nginx/html
       - ./config:/etc/nginx/conf.d:ro
-  
+
   db:
     image: postgres:13
     volumes:
@@ -130,6 +143,7 @@ volumes:
 ## Advanced Topics
 
 ### Volume Backup & Restore
+
 ```bash
 # Backup volume
 docker run --rm -v myvolume:/data -v $(pwd):/backup \
@@ -141,6 +155,7 @@ docker run --rm -v myvolume:/data -v $(pwd):/backup \
 ```
 
 ### Volume Migration
+
 ```bash
 # Export volume to another host
 docker run --rm -v myvolume:/data alpine tar cz -C /data . | \
@@ -148,6 +163,7 @@ docker run --rm -v myvolume:/data alpine tar cz -C /data . | \
 ```
 
 ### Volume with Custom Drivers
+
 ```bash
 # NFS volume
 docker volume create --driver local \
@@ -164,6 +180,7 @@ docker volume create \
 ```
 
 ### Performance Optimization
+
 ```bash
 # tmpfs for temporary high-performance storage
 docker run -v myvolume:/data:tmpfs alpine
@@ -176,6 +193,7 @@ docker run -v myvolume:/data:delegated myapp  # Write-heavy workloads
 ## Best Practices
 
 ### Naming & Organization
+
 ```bash
 # Use descriptive names
 docker volume create prod-webapp-data
@@ -186,6 +204,7 @@ docker volume create --label environment=prod --label app=webapp myvolume
 ```
 
 ### Security
+
 ```bash
 # Read-only mounts when possible
 docker run -v config:/app/config:ro myapp
@@ -195,6 +214,7 @@ docker run --rm -v myvolume:/data alpine chown -R $(id -u):$(id -g) /data
 ```
 
 ### Monitoring & Cleanup
+
 ```bash
 # Check volume usage
 docker system df -v
@@ -207,6 +227,7 @@ docker run --rm -v myvolume:/data alpine du -sh /data
 ```
 
 ### Common Troubleshooting
+
 ```bash
 # Volume not found - create explicitly
 docker volume create myvolume
@@ -222,6 +243,7 @@ docker inspect container-name | grep -A 5 '"Mounts"'
 ## Quick Reference
 
 ### Essential Commands
+
 ```bash
 # Volume lifecycle
 docker volume create myvolume
@@ -241,8 +263,9 @@ docker run --rm -v vol:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar
 ```
 
 ### Volume Types Summary
+
 - **Named volumes**: `docker run -v myvolume:/path` - Best for production
-- **Bind mounts**: `docker run -v /host:/container` - Best for development  
+- **Bind mounts**: `docker run -v /host:/container` - Best for development
 - **Anonymous volumes**: `docker run -v /path` - Best for temporary data
 
 Remember: Always backup important data and use appropriate volume types for your use case!
