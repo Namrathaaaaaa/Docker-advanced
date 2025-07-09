@@ -175,205 +175,74 @@ docker run -v myvolume:/data:delegated myapp  # Write-heavy workloads
 
 ## Best Practices
 
-### 1. Volume Naming Convention
-
+### Naming & Organization
 ```bash
-# Use descriptive names with environment prefix
+# Use descriptive names
 docker volume create prod-webapp-data
-docker volume create dev-webapp-data
-docker volume create staging-webapp-logs
+docker volume create dev-webapp-logs
+
+# Use labels for organization
+docker volume create --label environment=prod --label app=webapp myvolume
 ```
 
-### 2. Lifecycle Management
-
+### Security
 ```bash
-# Tag volumes with metadata for automated cleanup
-docker volume create \
-  --label environment=staging \
-  --label ttl=7days \
-  --label auto-cleanup=true \
-  staging-temp-data
-```
+# Read-only mounts when possible
+docker run -v config:/app/config:ro myapp
 
-### 3. Backup Strategy
-
-- **Production**: Daily automated backups with 30-day retention
-- **Staging**: Weekly backups with 7-day retention
-- **Development**: Manual backups before major changes
-
-### 4. Monitoring Volume Usage
-
-```bash
-# Monitor volume disk usage
-docker system df -v
-
-# Custom monitoring script
-cat << 'EOF' > volume-monitor.sh
-#!/bin/bash
-echo "Volume Usage Report - $(date)"
-echo "================================"
-docker volume ls --format "table {{.Name}}\t{{.Driver}}" | while read name driver; do
-  if [ "$name" != "VOLUME" ]; then
-    size=$(docker run --rm -v $name:/data alpine du -sh /data 2>/dev/null | cut -f1)
-    echo "$name: $size"
-  fi
-done
-EOF
-```
-
-### 5. Environment-Specific Configurations
-
-```yaml
-# Production docker-compose.yml
-version: '3.8'
-services:
-  app:
-    volumes:
-      - prod-data:/app/data
-      - prod-logs:/app/logs:rw
-      - prod-config:/app/config:ro
-
-volumes:
-  prod-data:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=nfs-server,rw
-      device: :/prod/data
-  
-  prod-logs:
-    driver: local
-    labels:
-      backup: "hourly"
-      retention: "90days"
-  
-  prod-config:
-    driver: local
-    labels:
-      backup: "daily"
-      retention: "365days"
-```
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-#### 1. Volume Not Found
-
-```bash
-# Error: volume not found
-# Solution: Create volume explicitly
-docker volume create myvolume
-```
-
-#### 2. Permission Denied
-
-```bash
-# Error: permission denied in container
-# Solution: Fix ownership
+# Fix permissions
 docker run --rm -v myvolume:/data alpine chown -R $(id -u):$(id -g) /data
 ```
 
-#### 3. Volume Space Issues
-
+### Monitoring & Cleanup
 ```bash
 # Check volume usage
 docker system df -v
 
-# Clean up unused volumes
+# Clean unused volumes
 docker volume prune
 
-# Check specific volume size
+# Monitor specific volume size
 docker run --rm -v myvolume:/data alpine du -sh /data
 ```
 
-#### 4. Mount Point Issues
-
+### Common Troubleshooting
 ```bash
+# Volume not found - create explicitly
+docker volume create myvolume
+
+# Permission denied - fix ownership
+docker run --rm -v myvolume:/data alpine chown -R 1000:1000 /data
+
 # Debug mount issues
 docker run --rm -v myvolume:/data alpine ls -la /data
-docker run --rm -v myvolume:/data alpine mount | grep /data
+docker inspect container-name | grep -A 5 '"Mounts"'
 ```
 
-#### 5. Performance Issues
+## Quick Reference
 
+### Essential Commands
 ```bash
-# Check I/O stats
-docker stats
-
-# Use appropriate mount options
-docker run -v myvolume:/data:cached myapp  # For read-heavy
-docker run -v myvolume:/data:delegated myapp  # For write-heavy
-```
-
-### Debugging Commands
-
-```bash
-# Inspect volume configuration
+# Volume lifecycle
+docker volume create myvolume
+docker volume ls
 docker volume inspect myvolume
+docker volume rm myvolume
+docker volume prune
 
-# Check container mount points
-docker inspect container-name | grep -A 10 '"Mounts"'
+# Using volumes
+docker run -v myvolume:/path container
+docker run -v /host:/container container
+docker run -v /container container  # anonymous
 
-# View volume usage across system
-docker system df -v
-
-# Find volumes without containers
-docker volume ls --filter dangling=true
-
-# Check volume driver capabilities
-docker info | grep -A 10 "Storage Driver"
+# Backup & restore
+docker run --rm -v vol:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz -C /data .
+docker run --rm -v vol:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz -C /data
 ```
 
-## Performance Considerations
+### Volume Types Summary
+- **Named volumes**: `docker run -v myvolume:/path` - Best for production
+- **Bind mounts**: `docker run -v /host:/container` - Best for development  
+- **Anonymous volumes**: `docker run -v /path` - Best for temporary data
 
-### 1. Volume Driver Performance
-
-| Driver Type | Use Case | Performance | Platform |
-|-------------|----------|-------------|----------|
-| Local | General purpose | Good | All |
-| tmpfs | Temporary data | Excellent | Linux |
-| NFS | Network storage | Moderate | All |
-| Cloud | Remote storage | Variable | All |
-
-### 2. Mount Option Impact
-
-```bash
-# Performance testing script
-cat << 'EOF' > volume-perf-test.sh
-#!/bin/bash
-VOLUME_NAME="perf-test-volume"
-docker volume create $VOLUME_NAME
-
-echo "Testing write performance..."
-time docker run --rm -v $VOLUME_NAME:/data alpine \
-  dd if=/dev/zero of=/data/testfile bs=1M count=100
-
-echo "Testing read performance..."
-time docker run --rm -v $VOLUME_NAME:/data alpine \
-  dd if=/data/testfile of=/dev/null bs=1M
-
-docker volume rm $VOLUME_NAME
-EOF
-```
-
-### 3. Optimization Tips
-
-- Use local volumes for best performance
-- Consider tmpfs for temporary high-performance storage
-- Use appropriate mount options (cached, delegated)
-- Monitor and limit volume sizes
-- Regular cleanup of unused volumes
-
-## Conclusion
-
-Docker Volumes are essential for building robust, scalable containerized applications. Understanding the different types of volumes, their use cases, and best practices will help you design better container architectures with proper data persistence, sharing, and backup strategies.
-
-Remember to:
-- Choose the right volume type for your use case
-- Implement proper backup and disaster recovery plans
-- Monitor volume usage and performance
-- Follow security best practices
-- Use appropriate naming conventions and labels
-
-For more advanced scenarios, consider using Docker Swarm or Kubernetes volume management features, which provide additional capabilities for distributed storage management.
+Remember: Always backup important data and use appropriate volume types for your use case!
