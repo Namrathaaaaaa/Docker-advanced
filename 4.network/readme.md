@@ -123,4 +123,5 @@ networks:
 | Default Bridge | Development/testing           |
 
 ---
-❤️ **Happy Learning! Made with Love** ❤️
+
+❤️ **Happy Learning! ** ❤️
