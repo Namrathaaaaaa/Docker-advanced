@@ -173,15 +173,15 @@ networks:
 
 ## Common Use Cases
 
-| Network Type   | Best For                      | Performance | Isolation |
-| -------------- | ----------------------------- | ----------- | --------- |
-| Bridge         | Development/testing           | Good        | Limited   |
-| Custom Bridge  | Microservices on single host  | Good        | Good      |
-| Host           | High-performance applications | Excellent   | None      |
-| None           | Security isolation            | N/A         | Maximum   |
-| Overlay        | Docker Swarm clusters         | Good        | Good      |
-| Macvlan        | Legacy apps, direct L2 access | Excellent   | Good      |
-| Ipvlan         | Multi-IP with shared MAC      | Excellent   | Good      |
+| Network Type  | Best For                      | Performance | Isolation |
+| ------------- | ----------------------------- | ----------- | --------- |
+| Bridge        | Development/testing           | Good        | Limited   |
+| Custom Bridge | Microservices on single host  | Good        | Good      |
+| Host          | High-performance applications | Excellent   | None      |
+| None          | Security isolation            | N/A         | Maximum   |
+| Overlay       | Docker Swarm clusters         | Good        | Good      |
+| Macvlan       | Legacy apps, direct L2 access | Excellent   | Good      |
+| Ipvlan        | Multi-IP with shared MAC      | Excellent   | Good      |
 
 ---
 
