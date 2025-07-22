@@ -175,7 +175,7 @@ networks:
 
 | Network Type   | Best For                      | Performance | Isolation |
 | -------------- | ----------------------------- | ----------- | --------- |
-| Default Bridge | Development/testing           | Good        | Limited   |
+| Bridge         | Development/testing           | Good        | Limited   |
 | Custom Bridge  | Microservices on single host  | Good        | Good      |
 | Host           | High-performance applications | Excellent   | None      |
 | None           | Security isolation            | N/A         | Maximum   |
