@@ -6,7 +6,7 @@ Docker provides several network drivers to enable communication between containe
 
 ## Network Types
 
-### 1. **Default Bridge Network**
+### 1. **Bridge Network**
 
 ```bash
 # Default network for containers
